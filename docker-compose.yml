@@ -1,0 +1,45 @@
+version: '3'
+
+services:
+  server:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: express-server
+    restart: on-failure
+    volumes:
+      - ./backend/:/usr/src/app
+    ports:
+      - "80:3000"
+    depends_on:
+      - db
+    links:
+      - db
+    
+  db:
+    #build:
+    #    context: ./db
+    #    dockerfile: Dockerfile
+    image: postgres
+    container_name: postgres-server
+    restart: on-failure
+    ports:
+      - "5432:5432"
+    environment: 
+        POSTGRES_PASSWORD: test
+        POSTGRES_USER: postgres
+        POSTGRES_DB: test
+        #PGDATA: /var/lib/postgresql/data/pgdata
+    volumes:
+      - "./db/init.sql:/docker-entrypoint-initdb.d/init.sql"
+      #- "/db/data:/var/lib/postgresql/data/"
+
+  client:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: react-client
+    volumes:
+      - ./frontend/:/usr/app
+    ports:
+      - "8080:3000"
